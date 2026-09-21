@@ -1,239 +1,185 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../hooks/use-auth';
-import { useGroups, useJoinGroup, useLeaveGroup } from '../hooks/use-groups';
-import { GroupCategory, GroupResponse } from '@skillnest/shared';
-import {
-  Compass,
-  Users,
-  Calendar,
-  MapPin,
-  Sparkles,
-  ArrowRight,
-  CheckCircle2,
-  LogOut,
-  LogIn,
-} from 'lucide-react';
+import { useGroups } from '../hooks/use-groups';
+import { GROUP_CATEGORIES, GroupCategory } from '@skillnest/shared';
+import { Navbar } from '../components/navbar';
+import { GroupCard } from '../components/group-card';
+import { AuthModal } from '../components/auth-modal';
+import { CreateGroupModal } from '../components/create-group-modal';
+import { Sparkles, Search, PlusCircle, Compass, CheckCircle } from 'lucide-react';
+import { Button } from '../components/ui/button';
 
 export default function HomePage() {
-  const { user, isAuthenticated, isLoggingIn, login, logout } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<GroupCategory | undefined>();
   const [search, setSearch] = useState('');
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const { data: groupsData, isLoading } = useGroups({
     category: selectedCategory,
     search: search || undefined,
   });
 
-  const handleDemoLogin = async () => {
-    try {
-      await login({
-        email: 'sarah.host@skillnest.dev',
-        password: 'Password123!',
-      });
-    } catch {
-      alert('Could not log in demo user. Please make sure the backend is running.');
+  const handleOpenCreateGroup = () => {
+    if (!isAuthenticated) {
+      setAuthModalOpen(true);
+      return;
     }
+    setCreateModalOpen(true);
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
-      {/* Navigation */}
-      <header className="sticky top-0 z-30 backdrop-blur-md bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
-              <Compass className="w-6 h-6" />
-            </div>
-            <span className="font-heading font-bold text-xl tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
-              SkillNest
-            </span>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            {isAuthenticated ? (
-              <div className="flex items-center space-x-3">
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  {user?.name}
-                </span>
-                <button
-                  onClick={() => logout()}
-                  className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 transition"
-                >
-                  <LogOut className="w-3.5 h-3.5 mr-1.5" />
-                  Sign Out
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={handleDemoLogin}
-                disabled={isLoggingIn}
-                className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition"
-              >
-                <LogIn className="w-4 h-4 mr-2" />
-                Demo Sign In
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
+      <Navbar onOpenCreateGroup={handleOpenCreateGroup} />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-16 sm:py-24 bg-gradient-to-b from-indigo-50/50 via-white to-slate-50 dark:from-indigo-950/20 dark:via-slate-950 dark:to-slate-950 border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-100/70 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs font-semibold uppercase tracking-wider mb-6">
+      <section className="relative overflow-hidden py-16 sm:py-24 bg-gradient-to-b from-indigo-50/60 via-white to-slate-50 dark:from-indigo-950/20 dark:via-slate-950 dark:to-slate-950 border-b border-slate-200/80 dark:border-slate-800/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-100/70 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-xs font-semibold uppercase tracking-wider mb-6 border border-indigo-200/50 dark:border-indigo-800/50">
             <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-            <span>Redesigned Modern Experience</span>
+            <span>Real-World Skill Communities</span>
           </div>
 
-          <h1 className="font-heading text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white max-w-3xl mx-auto leading-tight">
-            Discover and Join Real-World{' '}
-            <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-              Hobby Communities
+          <h1 className="font-heading text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white max-w-3xl mx-auto leading-[1.15]">
+            Master new passions with{' '}
+            <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 bg-clip-text text-transparent">
+              local experts
             </span>
           </h1>
 
-          <p className="mt-6 text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            From embedded hardware hacking and coffee roasting to landscape photography. Connect with verified hosts and fellow enthusiasts.
+          <p className="mt-5 text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            Join small-cohort hands-on workshops in robotics, specialty cooking, landscape photography, game development, and more.
           </p>
 
-          <div className="mt-8 max-w-md mx-auto flex gap-2">
-            <input
-              type="text"
-              placeholder="Search by topic, keyword, or city..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm shadow-sm"
-            />
+          {/* Search bar & Quick CTA */}
+          <div className="mt-8 max-w-xl mx-auto flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+              <input
+                type="text"
+                placeholder="Search by topic, keyword, or venue..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-300/80 dark:border-slate-700/80 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm shadow-sm"
+              />
+            </div>
+            <Button size="lg" onClick={handleOpenCreateGroup} className="h-11">
+              <PlusCircle className="w-4 h-4 mr-2" />
+              Host a Group
+            </Button>
+          </div>
+
+          {/* Quick Value Points */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs font-medium text-slate-500 dark:text-slate-400">
+            <span className="flex items-center">
+              <CheckCircle className="w-4 h-4 text-emerald-500 mr-1.5" />
+              Direct Host Discussions
+            </span>
+            <span className="flex items-center">
+              <CheckCircle className="w-4 h-4 text-emerald-500 mr-1.5" />
+              Strict Attendee Limits
+            </span>
+            <span className="flex items-center">
+              <CheckCircle className="w-4 h-4 text-emerald-500 mr-1.5" />
+              In-Person Skill Sharing
+            </span>
           </div>
         </div>
       </section>
 
-      {/* Groups Grid */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-1 w-full">
-        <div className="flex items-center justify-between mb-8">
+      {/* Main Content Area */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-1 space-y-8">
+        {/* Category Filter Pills */}
+        <div className="flex items-center space-x-2 overflow-x-auto pb-2 scrollbar-none">
+          <button
+            onClick={() => setSelectedCategory(undefined)}
+            className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+              selectedCategory === undefined
+                ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/20'
+                : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:border-indigo-400'
+            }`}
+          >
+            All Categories
+          </button>
+          {GROUP_CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                selectedCategory === cat
+                  ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/20'
+                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:border-indigo-400'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Section Header */}
+        <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-heading text-2xl font-bold text-slate-900 dark:text-white">
-              Upcoming Skill Groups
+            <h2 className="font-heading text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+              {selectedCategory ? `${selectedCategory} Workshops` : 'Upcoming Community Sessions'}
             </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              {groupsData?.meta?.total ?? 0} active sessions available
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Showing {groupsData?.data?.length ?? 0} available groups
             </p>
           </div>
         </div>
 
+        {/* Groups Grid */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((n) => (
-              <div key={n} className="h-72 rounded-2xl bg-slate-200 dark:bg-slate-800 animate-pulse" />
+            {[1, 2, 3, 4, 5, 6].map((n) => (
+              <div key={n} className="h-80 rounded-2xl bg-slate-200 dark:bg-slate-850 animate-pulse" />
             ))}
+          </div>
+        ) : groupsData?.data?.length === 0 ? (
+          <div className="p-16 text-center rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 space-y-4">
+            <Compass className="w-12 h-12 text-slate-400 mx-auto" />
+            <h3 className="font-heading font-bold text-lg text-slate-800 dark:text-slate-200">
+              No matching groups found
+            </h3>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              Be the pioneer! Start your own skill group in this category and bring local enthusiasts together.
+            </p>
+            <Button size="sm" onClick={handleOpenCreateGroup}>
+              <PlusCircle className="w-4 h-4 mr-1.5" />
+              Create Group Now
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {groupsData?.data?.map((group) => (
-              <GroupCard key={group.id} group={group} isAuthenticated={isAuthenticated} />
+              <GroupCard
+                key={group.id}
+                group={group}
+                isAuthenticated={isAuthenticated}
+                onRequireAuth={() => setAuthModalOpen(true)}
+              />
             ))}
           </div>
         )}
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 dark:border-slate-800 py-8 bg-white dark:bg-slate-900 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 dark:text-slate-400">
-          © 2026 SkillNest. Built as a high-performance pnpm monorepo with Next.js & NestJS.
+      <footer className="border-t border-slate-200 dark:border-slate-800 py-10 bg-white dark:bg-slate-900 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
+          <p>© 2026 SkillNest Inc. Enterprise-grade pnpm monorepo platform.</p>
+          <div className="flex items-center space-x-6">
+            <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-indigo-600 transition">
+              Back to Top
+            </button>
+          </div>
         </div>
       </footer>
-    </div>
-  );
-}
 
-function GroupCard({
-  group,
-  isAuthenticated,
-}: {
-  group: GroupResponse;
-  isAuthenticated: boolean;
-}) {
-  const joinMutation = useJoinGroup(group.id);
-  const leaveMutation = useLeaveGroup(group.id);
-
-  const handleToggle = () => {
-    if (!isAuthenticated) {
-      alert('Please sign in to join groups.');
-      return;
-    }
-    if (group.isMember) {
-      leaveMutation.mutate();
-    } else {
-      joinMutation.mutate();
-    }
-  };
-
-  const isFull = group.memberCount >= group.maxMembers;
-
-  return (
-    <div className="group rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between">
-      <div>
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
-            {group.category}
-          </span>
-          <span className="flex items-center text-xs font-medium text-slate-500 dark:text-slate-400">
-            <Users className="w-3.5 h-3.5 mr-1" />
-            {group.memberCount} / {group.maxMembers}
-          </span>
-        </div>
-
-        <h3 className="font-heading font-bold text-lg text-slate-900 dark:text-white group-hover:text-indigo-600 transition line-clamp-1">
-          {group.name}
-        </h3>
-
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
-          {group.description}
-        </p>
-
-        <div className="mt-4 space-y-1.5 text-xs text-slate-500 dark:text-slate-400">
-          <div className="flex items-center">
-            <MapPin className="w-3.5 h-3.5 mr-1.5 text-slate-400" />
-            <span>{group.location}</span>
-          </div>
-          <div className="flex items-center">
-            <Calendar className="w-3.5 h-3.5 mr-1.5 text-slate-400" />
-            <span>{new Date(group.startDate).toLocaleDateString()}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
-        <div className="text-xs text-slate-500">
-          Hosted by <span className="font-medium text-slate-700 dark:text-slate-300">{group.host.name}</span>
-        </div>
-
-        {group.isHost ? (
-          <span className="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-            Host
-          </span>
-        ) : group.isMember ? (
-          <button
-            onClick={handleToggle}
-            disabled={leaveMutation.isPending}
-            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-rose-50 hover:text-rose-600 transition"
-          >
-            <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
-            Joined
-          </button>
-        ) : (
-          <button
-            onClick={handleToggle}
-            disabled={joinMutation.isPending || isFull}
-            className="inline-flex items-center px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 transition"
-          >
-            {isFull ? 'Full' : 'Join Group'}
-            <ArrowRight className="w-3 h-3 ml-1" />
-          </button>
-        )}
-      </div>
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+      <CreateGroupModal isOpen={createModalOpen} onClose={() => setCreateModalOpen(false)} />
     </div>
   );
 }
