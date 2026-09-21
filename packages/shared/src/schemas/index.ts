@@ -3,3 +3,7 @@ export * from './pagination.schema.js';
 export * from './auth.schema.js';
 export * from './user.schema.js';
 export * from './media.schema.js';
+export * from './group.schema.js';
+export * from './membership.schema.js';
+export * from './reply.schema.js';
+export * from './comment.schema.js';

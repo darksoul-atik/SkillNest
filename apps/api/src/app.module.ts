@@ -11,6 +11,8 @@ import { UsersModule } from './modules/users/users.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { HealthModule } from './modules/health/health.module';
 import { MediaModule } from './modules/media/media.module';
+import { GroupsModule } from './modules/groups/groups.module';
+import { CommentsModule } from './modules/comments/comments.module';
 import { MailModule } from './mail/mail.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
@@ -54,6 +56,8 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
     AdminModule,
     HealthModule,
     MediaModule,
+    GroupsModule,
+    CommentsModule,
   ],
   providers: [
     {

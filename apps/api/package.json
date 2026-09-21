@@ -12,7 +12,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "seed:admin": "node dist/scripts/seed-admin.js"
+    "seed:admin": "node dist/scripts/seed-admin.js",
+    "seed:data": "node dist/scripts/seed-data.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.11",
