@@ -1,0 +1,42 @@
+name: SkillNest Monorepo CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Lint, Test & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.5.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck Workspace
+        run: pnpm -r typecheck
+
+      - name: Run Backend Unit Tests
+        run: pnpm --filter @skillnest/api test
+
+      - name: Run Backend E2E Tests
+        run: pnpm --filter @skillnest/api test:e2e
+
+      - name: Build All Monorepo Packages
+        run: pnpm -r build

@@ -1,0 +1,62 @@
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: skillnest-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'db.runCommand(\"ping\").ok' | mongosh localhost:27017/test --quiet"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: skillnest-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      WEB_ORIGIN: http://localhost:5173
+      MONGODB_URI: mongodb://mongo:27017/skillnest
+      JWT_ACCESS_SECRET: production_super_secret_access_token_key_at_least_32_chars
+      JWT_ACCESS_TTL: 15m
+      JWT_REFRESH_SECRET: production_super_secret_refresh_token_key_at_least_32_chars
+      JWT_REFRESH_TTL: 7d
+      ADMIN_EMAIL: admin@skillnest.dev
+      ADMIN_PASSWORD: AdminSecurePassword123!
+      THROTTLE_TTL: 60
+      THROTTLE_LIMIT: 100
+      AUTH_THROTTLE_LIMIT: 10
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:3000/api/v1
+    container_name: skillnest-web
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      NODE_ENV: production
+      PORT: 5173
+      NEXT_PUBLIC_API_URL: http://localhost:3000/api/v1
+    depends_on:
+      - api
+
+volumes:
+  mongo-data:
+    driver: local
